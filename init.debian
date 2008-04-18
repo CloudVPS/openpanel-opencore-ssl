@@ -1,0 +1,66 @@
+#! /bin/sh
+# Version:	@(#)opencore-ssl 0.9,.0 14-Feb-2008  info@openpanel.com
+#
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/var/opencore/bin/opencore-ssl
+NAME=opencore-ssl
+DESC=opencore-ssl
+
+checkcert() {
+  if [ ! -e /etc/openpanel/openpanel.pem ]; then
+    openssl req -new -x509 -days 3650 -nodes -out /etc/openpanel/openpanel.pem -keyout /etc/openpanel/openpanel.pem >/dev/null 2>&1 << _EOF_
+NL
+Zuid-Holland
+Rotterdam
+OpenPanel
+
+$(hostname)
+
+_EOF_
+    chmod 600 /etc/openpanel/openpanel.pem
+    return $?
+  fi
+}
+
+test -x $DAEMON || exit 0
+
+set -e
+
+case "$1" in
+  start)
+    checkcert || return 1
+	echo -n "Starting $DESC: "
+	start-stop-daemon --start --quiet --pidfile /var/run/$NAME.pid \
+		--exec $DAEMON -- $DAEMON_OPTS
+	echo "$NAME."
+	;;
+  stop)
+	echo -n "Stopping $DESC: "
+	start-stop-daemon --stop --signal TERM --quiet --pidfile /var/run/$NAME.pid \
+		--exec $DAEMON
+	echo "$NAME."
+	;;
+  restart|force-reload)
+	#
+	#	If the "reload" option is implemented, move the "force-reload"
+	#	option to the "reload" entry above. If not, "force-reload" is
+	#	just the same as "restart".
+	#
+	echo -n "Restarting $DESC: "
+	start-stop-daemon --stop --signal TERM --quiet --pidfile \
+		/var/run/$NAME.pid --exec $DAEMON
+	sleep 1
+	start-stop-daemon --start --quiet --pidfile \
+		/var/run/$NAME.pid --exec $DAEMON -- $DAEMON_OPTS
+	echo "$NAME."
+	;;
+  *)
+	N=/etc/init.d/$NAME
+	# echo "Usage: $N {start|stop|restart|reload|force-reload}" >&2
+	echo "Usage: $N {start|stop|restart|force-reload}" >&2
+	exit 1
+	;;
+esac
+
+exit 0

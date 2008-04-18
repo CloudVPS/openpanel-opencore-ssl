@@ -1,0 +1,60 @@
+2005-09-28 17:58:31    Szilard Hajba <szilu@symbion.hu>
+
+	* Improved certificate handling (chained certificates are now supported)
+	* Powered by logo
+	* Release 1.0.5
+
+2005-08-07 09:19:53    Szilard Hajba <szilu@symbion.hu>
+
+	* More error information on SSL protocol errors during SSL_accept()
+	* README: Report bugs to the mailing list
+	* Added -U, -D options (buffer size)
+	* Release 1.0.4
+
+2005-04-08 11:08:45    Szilard Hajba <szilu@symbion.hu>
+
+	* Some new compiler warnings fixed
+	* Connection handling cleanup
+	* Release 1.0.3
+
+2005-04-07 17:57:23    Szilard Hajba <szilu@symbion.hu>
+
+	* #1178558 fixed
+
+2004-04-13 21:20:41    Szilard Hajba <szilu@symbion.hu>
+
+	* Added -f option (run in the foreground)
+
+2004-03-02 10:37:45    Szilard Hajba <szilu@symbion.hu>
+
+	* BUGFIX: 100% CPU usage during ssl_accept state
+
+2003-09-23 19:49:45    Szilard Hajba <szilu@symbion.hu>
+
+	* Listen on multiple interfaces (patch by Marco Lanzotti)
+	* Release 1.0.1
+
+2001-11-05 03:26:26    Szilard Hajba <szilu@revai.hu>
+
+	* UNIX domain socket used Linux specific headers, now it compiles on
+		FreeBSD.
+
+2001-11-04 23:51:49    Szilard Hajba <szilu@revai.hu>
+
+	* Support for UNIX domain sockets (-c unix:<path>)
+	* Log errors to syslog
+	* Stable release 1.0.0
+
+2001-10-08 01:39:46    Szilard Hajba <szilu@revai.hu>
+
+	* Some bugs were fixed, now it is tested with large file transfers
+
+2001-06-14 17:44:03    Szilard Hajba <szilu@revai.hu>
+
+	* Write buffering bug fix. The bug caused some data damage when large
+		files transferred with HTTPS.
+	* Two config options added for the two way buffer sizes.
+
+2001-02-16 23:47:29    Szilard Hajba <szilu@revai.hu>
+
+	* Initial release, ChangeLog started
