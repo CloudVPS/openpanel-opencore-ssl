@@ -4,15 +4,13 @@
 BUILD_ROOT=$(CURDIR)/debian/tmp
 install:
 	rm -rf ${BUILD_ROOT}
-	mkdir -p ${BUILD_ROOT}/var/opencore/bin
 	mkdir -p ${BUILD_ROOT}/etc/openpanel
 	mkdir -p ${BUILD_ROOT}/etc/init.d
-	install -m 755 opencore-ssl ${BUILD_ROOT}/var/opencore/bin
 	chmod 600 ${BUILD_ROOT}/etc/openpanel
 	install -m 755 init.debian ${BUILD_ROOT}/etc/init.d/openpanel-ssl
+	install -m 644 pound.cfg ${BUILD_ROOT}/etc/openpanel/pound.cfg
 
 build:
-	make
 binary-indep:
 
 binary-arch binary: build install

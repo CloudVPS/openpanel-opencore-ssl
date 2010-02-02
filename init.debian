@@ -1,66 +1,63 @@
 #! /bin/sh
-# Version:	@(#)opencore-ssl 0.9,.0 14-Feb-2008  info@openpanel.com
+### BEGIN INIT INFO
+# Provides:          openpanel-ssl
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Should-Start:      $named
+# Should-Stop:       $named
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: ssl-proxy for openpanel
+# Description:       ssl-proxy for openpanel
+### END INIT INFO
 #
+# pound	- reverse proxy, load-balancer and https front-end for web-servers
 
-PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON=/var/opencore/bin/opencore-ssl
-NAME=opencore-ssl
-DESC=opencore-ssl
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/sbin/pound
+DESC="ssl-proxy for openpanel"
+NAME=openpanel-ssl
+PIDFILE=/var/run/openpanel-ssl.pid
+CONFIG=/etc/openpanel/pound.cfg
 
-checkcert() {
-  if [ ! -e /etc/openpanel/openpanel.pem ]; then
-    openssl req -new -x509 -days 3650 -nodes -out /etc/openpanel/openpanel.pem -keyout /etc/openpanel/openpanel.pem >/dev/null 2>&1 << _EOF_
-NL
-Zuid-Holland
-Rotterdam
-OpenPanel
+# Exit if the daemon does not exist (anymore)
+test -f $DAEMON || exit 0
 
-$(hostname)
+. /lib/lsb/init-functions
 
-_EOF_
-    chmod 600 /etc/openpanel/openpanel.pem
-    return $?
-  fi
-}
-
-test -x $DAEMON || exit 0
-
-set -e
-
+# The real work of an init script
 case "$1" in
   start)
-    checkcert || return 1
-	echo -n "Starting $DESC: "
-	start-stop-daemon --start --quiet --pidfile /var/run/$NAME.pid \
-		--exec $DAEMON -- $DAEMON_OPTS
-	echo "$NAME."
+	log_daemon_msg "Starting $DESC" "$NAME"
+	start_daemon $DAEMON -p $PIDFILE -f $CONFIG
+	log_end_msg $?
 	;;
   stop)
-	echo -n "Stopping $DESC: "
-	start-stop-daemon --stop --signal TERM --quiet --pidfile /var/run/$NAME.pid \
-		--exec $DAEMON
-	echo "$NAME."
+	log_daemon_msg "Stopping $DESC" "$NAME"
+	killproc -p $PIDFILE $DAEMON
+	log_end_msg $?
 	;;
   restart|force-reload)
-	#
-	#	If the "reload" option is implemented, move the "force-reload"
-	#	option to the "reload" entry above. If not, "force-reload" is
-	#	just the same as "restart".
-	#
-	echo -n "Restarting $DESC: "
-	start-stop-daemon --stop --signal TERM --quiet --pidfile \
-		/var/run/$NAME.pid --exec $DAEMON
-	sleep 1
-	start-stop-daemon --start --quiet --pidfile \
-		/var/run/$NAME.pid --exec $DAEMON -- $DAEMON_OPTS
-	echo "$NAME."
+	log_daemon_msg "Restarting $DESC" "$NAME"
+	killproc -p $PIDFILE $DAEMON
+	start_daemon $DAEMON -p $PIDFILE -f $CONFIG
+	echo "."
 	;;
+  status)
+        pidofproc -p "$PIDFILE" >/dev/null
+	status=$?
+	if [ $status -eq 0 ]; then
+            log_success_msg "$NAME is running"
+        else
+            log_success_msg "$NAME is not running"
+        fi
+	exit $status
+        ;;
   *)
-	N=/etc/init.d/$NAME
-	# echo "Usage: $N {start|stop|restart|reload|force-reload}" >&2
-	echo "Usage: $N {start|stop|restart|force-reload}" >&2
+	echo "Usage: $0 {start|stop|restart|force-reload|status}"
 	exit 1
 	;;
 esac
 
+# Fallthrough if work done.
 exit 0
