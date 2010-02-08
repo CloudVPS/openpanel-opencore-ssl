@@ -19,8 +19,15 @@ set -e
 
 case "$1" in
     configure)
-update-rc.d openpanel-ssl start 72 2 3 4 5 . stop 72 0 1 6 . > /dev/null
-/etc/init.d/openpanel-ssl start
+	if [ ! -e "/etc/ssl/private/ssl-openpanel.key" ]; then
+		ln -s /etc/ssl/private/ssl-cert-snakeoil.key /etc/ssl/private/ssl-openpanel.key
+	fi
+	if [ ! -e "/etc/ssl/certs/ssl-openpanel.pem" ]; then
+		ln -s /etc/ssl/certs/ssl-cert-snakeoil.pem /etc/ssl/certs/ssl-openpanel.pem
+	fi
+	
+	update-rc.d openpanel-ssl start 72 2 3 4 5 . stop 72 0 1 6 . > /dev/null
+	/etc/init.d/openpanel-ssl start
 
     ;;
 

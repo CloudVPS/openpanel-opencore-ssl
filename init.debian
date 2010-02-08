@@ -25,6 +25,11 @@ test -f $DAEMON || exit 0
 
 . /lib/lsb/init-functions
 
+rm -f /etc/openpanel/pound.pem
+touch /etc/openpanel/pound.pem
+chmod 600 /etc/openpanel/pound.pem
+cat /etc/ssl/certs/ssl-openpanel.pem /etc/ssl/private/ssl-openpanel.key > /etc/openpanel/pound.pem
+
 # The real work of an init script
 case "$1" in
   start)
