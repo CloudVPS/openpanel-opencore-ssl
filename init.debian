@@ -1,4 +1,5 @@
 #! /bin/sh
+
 ### BEGIN INIT INFO
 # Provides:          openpanel-ssl
 # Required-Start:    $remote_fs $syslog
@@ -15,57 +16,80 @@
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/sbin/pound
-DESC="ssl-proxy for openpanel"
+DESC="Openpanel SSL proxy"
+LONGNAME=openpanel-ssl
 NAME=openpanel-ssl
-PIDFILE=/var/run/openpanel-ssl.pid
-CONFIG=/etc/openpanel/pound.cfg
+PIDFILE="/var/run/$LONGNAME.pid"
+DAEMON_OPTS="-f /etc/openpanel/pound.cfg -p $PIDFILE"
 
 # Exit if the daemon does not exist (anymore)
 test -f $DAEMON || exit 0
 
 . /lib/lsb/init-functions
 
-rm -f /etc/openpanel/pound.pem
-touch /etc/openpanel/pound.pem
-chmod 600 /etc/openpanel/pound.pem
-echo '# automatically generated from /etc/ssl/certs/ssl-openpanel.pem' > /etc/openpanel/pound.pem
-echo '# and /etc/ssl/private/ssl-openpanel.key' >> /etc/openpanel/pound.pem
-echo '' >> /etc/openpanel/pound.pem
-cat /etc/ssl/certs/ssl-openpanel.pem /etc/ssl/private/ssl-openpanel.key >> /etc/openpanel/pound.pem
+generate_pound_config()
+{
+  rm -f /etc/openpanel/pound.pem
+  touch /etc/openpanel/pound.pem
+  chmod 600 /etc/openpanel/pound.pem
+  echo '# automatically generated from /etc/ssl/certs/ssl-openpanel.pem' > /etc/openpanel/pound.pem
+  echo '# and /etc/ssl/private/ssl-openpanel.key' >> /etc/openpanel/pound.pem
+  echo '' >> /etc/openpanel/pound.pem
+  cat /etc/ssl/certs/ssl-openpanel.pem /etc/ssl/private/ssl-openpanel.key >> /etc/openpanel/pound.pem
+}
 
-# The real work of an init script
+set -e
+
 case "$1" in
   start)
-	log_daemon_msg "Starting $DESC" "$NAME"
-	start_daemon $DAEMON -p $PIDFILE -f $CONFIG
-	log_end_msg $?
+    generate_pound_config
+	log_daemon_msg "Starting $DESC" $NAME
+	if start_daemon -p $PIDFILE $DAEMON $DAEMON_OPTS; then
+		#mv `ls -1tr /var/run/pound.pid | tail -1` $PIDFILE
+	    log_success_msg
+	else
+	    log_failure_msg
+	fi
 	;;
   stop)
-	log_daemon_msg "Stopping $DESC" "$NAME"
-	killproc -p $PIDFILE $DAEMON
-	log_end_msg $?
+	log_daemon_msg "Stopping $DESC" $NAME
+	if killproc -p $PIDFILE $DAEMON; then
+	    log_success_msg
+	else
+	    log_failure_msg
+	fi
 	;;
   restart|force-reload)
-	log_daemon_msg "Restarting $DESC" "$NAME"
+	#
+	#	If the "reload" option is implemented, move the "force-reload"
+	#	option to the "reload" entry above. If not, "force-reload" is
+	#	just the same as "restart".
+	#
+	log_daemon_msg "Restarting $DESC" $NAME
+
 	killproc -p $PIDFILE $DAEMON
-	start_daemon $DAEMON -p $PIDFILE -f $CONFIG
-	echo "."
+
+    generate_pound_config
+	if start-stop-daemon --start --quiet --oknodo --pidfile $PIDFILE --exec $DAEMON -- $DAEMON_OPTS; then
+	    log_end_msg 0
+	else
+	    log_end_msg 1
+	fi
 	;;
   status)
-        pidofproc -p "$PIDFILE" >/dev/null
-	status=$?
-	if [ $status -eq 0 ]; then
-            log_success_msg "$NAME is running"
-        else
-            log_success_msg "$NAME is not running"
-        fi
-	exit $status
-        ;;
+    if pidofproc -p $PIDFILE $DAEMON > /dev/null; then
+      log_success_msg "$NAME is running"
+    else
+      log_success_msg "$NAME is not running"
+    fi
+    exit $status
+	;;
+  
   *)
-	echo "Usage: $0 {start|stop|restart|force-reload|status}"
+	N=/etc/init.d/$NAME
+	echo "Usage: $N {start|stop|restart|force-reload|status}" >&2
 	exit 1
 	;;
 esac
 
-# Fallthrough if work done.
 exit 0
