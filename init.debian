@@ -70,7 +70,7 @@ case "$1" in
 	killproc -p $PIDFILE $DAEMON
 
     generate_pound_config
-	if start-stop-daemon --start --quiet --oknodo --pidfile $PIDFILE --exec $DAEMON -- $DAEMON_OPTS; then
+	if start_daemon -p $PIDFILE $DAEMON $DAEMON_OPTS; then
 	    log_end_msg 0
 	else
 	    log_end_msg 1
