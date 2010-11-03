@@ -8,4 +8,4 @@ Standards-Version: 3.7.2
 Package: openpanel-ssl
 Architecture: any
 Depends: openpanel-core, pound, ssl-cert
-Description: SSL remote access handler for openpanel
+Description: SSL remote access handler for OpenPanel
