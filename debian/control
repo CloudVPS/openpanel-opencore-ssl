@@ -1,11 +1,11 @@
 Source: openpanel-ssl
 Section: misc
 Priority: optional
-Maintainer: OpenPanel packager <packages@openpanel.com
+Maintainer: OpenPanel packager <packages@openpanel.com>
 Build-Depends: debhelper (>= 5)
 Standards-Version: 3.7.2
 
 Package: openpanel-ssl
 Architecture: any
-Depends: openpanel-core, pound, ssl-cert
+Depends: openpanel-core, pound, ssl-cert, ${shlibs:Depends}, ${misc:Depends}
 Description: SSL remote access handler for OpenPanel
